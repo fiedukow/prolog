@@ -8,10 +8,40 @@
 %%                                                         %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-pokazWszystko(Zmienne, Relacja) :-
-  findall(Wynik/DodaneZmienne, generateFit(Zmienne,Relacja,Wynik,DodaneZmienne), Lista),
-  write(Lista).
+learn([Relacja | Zmienne]) :-
+  
 
+pokazWszystko(Zmienne, Relacja) :-
+  findall(Dopasowania, getAndFit(Zmienne,Relacja,Dopasowania), Lista),
+  writeList(Lista),nl.
+
+writeList([]).
+
+writeList([E | Lista]) :-
+  write(E), nl,
+  writeList(Lista).
+  
+filterOnlyCovered(Zmienne, Relacja, Dopasowanie) :-
+  example([Relacja | ConcreteVariables]),
+  
+
+getAndFit(Zmienne, Relacja, Dopasowania) :-
+  generateFit(Zmienne, Relacja, Wynik, DodaneZmienne),
+  append(Zmienne,DodaneZmienne,WszystkieZmienne),
+  fitVariables(WszystkieZmienne, Dopasowania).
+
+fitVariables(Zmienne, Dopasowania) :-
+  fitVariables(Zmienne, Dopasowania, []).
+
+fitVariables([], [], _).
+
+fitVariables([Zmienna | ResztaZmiennych], [Zmienna=Osoba | ResztaDopasowan], Zakazy) :-
+  people(People),
+  member(Osoba, People),
+  not(member(Osoba, Zakazy)),
+  fitVariables(ResztaZmiennych, ResztaDopasowan, [Osoba | Zakazy]).
+  
+  
 generateFit([], _, _) :-
   write('Tak byc nie moze!'), nl.
 
@@ -24,7 +54,7 @@ genFitKnownLimit(Zmienne, ArgNo, Dopasowanie, Nowe) :-
   constructOldList(ArgNo, Zmienne, Stare), 
   length(Stare, IleStarych),
   IleStarych > 0,
-  IleNowych is ArgNo - IleStarych + 1,
+  IleNowych is ArgNo - IleStarych,
   constructNList(IleNowych, Nowe), 
   appendRandom(Nowe, Stare, Dopasowanie).
   
@@ -58,7 +88,7 @@ appendRandom(Lista1, [], Lista1) :- !.
 appendRandom([P | Lista1Rest], Lista2, [P | RestWynik]) :-
   appendRandom(Lista1Rest, Lista2, RestWynik).
 
-appendRandom(Lista1, [ P | Lista2Rest], [ P | RestWynik]) :-
+appendRandom(Lista1, [P | Lista2Rest], [P | RestWynik]) :-
   appendRandom(Lista1, Lista2Rest, RestWynik).
   
   
