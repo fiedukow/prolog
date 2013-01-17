@@ -42,7 +42,7 @@ generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   constructOldList(ArgNo, LastVar, Stare), 
   length(Stare, IleStarych),
   IleNowych is ArgNo - IleStarych,
-  constructNList(IleNowych, Nowe, LastVar, LastVar, LastVarAfter), 
+  constructNList(IleNowych, Nowe, LastVar, LastVarAfter), 
   appendRandom(Nowe, Stare, Dopasowanie).
   
 %konstruuje liste zmiennych o dlugosci mniejszej lub rownej MaxLenght
@@ -67,6 +67,8 @@ constructNListFromCands(N, VarOld, [Var | List]) :-
   getVarBetween(1, VarOld, Var),
   constructNListFromCands(N1, VarOld, List).
 
+%tworzy kolejne zmienne z zakresu od Beg do End (wlaczajac Beg i End)
+%getVarBetween(+Beg,+End,-Var)
 getVarBetween(Var,_,ruleVar(Var)).
 
 getVarBetween(Beg,End,Var) :-
@@ -74,7 +76,10 @@ getVarBetween(Beg,End,Var) :-
   Beg1 is Beg + 1,
   getVarBetween(Beg1,End,Var).
 
-
+%Tworzy liste zmiennych dlugosci N korzystajac tylko z nowych zmiennych
+%W szczegolnosci nowe zmienne moga byc wykorzystane wielokrotnie
+%Zwraca nowa wartosc LastVar!
+%constructNList(+N, -List, +LastVar, -NewValueOfLastVar)
 constructNList(N, List, LastVar, LastVarEnd) :-
   constructNList(N, List, LastVar, LastVar, LastVarEnd).
 
@@ -99,6 +104,7 @@ constructNList(N, [X | List], LastVar, LastVarAfter, LastVarEnd) :-
 %Losowe laczenie dwoch list z zachowaniem kolejnosci w obrebie elementow
 %pochodzacych z list pierwotnych
 %np [a,b], [c,d] -> [a,b,c,d], [a,c,b,d], [a,c,d,b], [c,d,a,b], [c,a,d,b], [c,a,b,d]
+%appendRandom(+L1, +L2, -OutList)
 appendRandom([], Lista2, Lista2) :- !.
 appendRandom(Lista1, [], Lista1) :- !.
 
