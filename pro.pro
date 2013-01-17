@@ -36,10 +36,13 @@ generateCandidate(0, _, _, _) :-
 %przeklada relacje na ilosc jej arguementow bowiem zeby wygenerowac mozliwe dopasowania zmiennych
 %nie trzeba wiedziec do jakiej relacji dopasowywujemy ale tylko ile argumentow jest do dopasowania
 %oraz ile zmiennych zostalo uzytych do tej pory (licznik).
+%generateCandidate(+LastVar, +Relacja/ArgNo, -Cand, -NewValueOfLastVar)
 generateCandidate(LastVar, Relacja/ArgNo, Cand, LastVarAfter) :-
   generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter),
   Cand =.. [Relacja|Dopasowanie].
 
+%generuje liste rule_varow o wielkosci ArgNo (lista argumentow dla danego kandydata)
+%generateCandidateArgNo(+LastVar, +ArgNo, -Dopasowanie, -NewValueOfLastVar)
 generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   constructOldList(ArgNo, LastVar, Stare), 
   length(Stare, IleStarych),
@@ -71,7 +74,7 @@ constructNListFromCands(N, VarOld, [Var | List]) :-
 
 %tworzy kolejne zmienne z zakresu od Beg do End (wlaczajac Beg i End)
 %getVarBetween(+Beg,+End,-Var)
-getVarBetween(Var,_,ruleVar(Var)).
+getVarBetween(Var,_,rule_var(Var)).
 
 getVarBetween(Beg,End,Var) :-
   Beg < End,
