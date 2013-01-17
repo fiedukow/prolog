@@ -38,12 +38,12 @@ generateCandidate(0, _, _, _) :-
 %oraz ile zmiennych zostalo uzytych do tej pory (licznik).
 %generateCandidate(+LastVar, +Relacja/ArgNo, -Cand, -NewValueOfLastVar)
 generateCandidate(LastVar, Relacja/ArgNo, Cand, LastVarAfter) :-
-  generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter),
+  generateCandidateArguments(LastVar, ArgNo, Dopasowanie, LastVarAfter),
   Cand =.. [Relacja|Dopasowanie].
 
 %generuje liste rule_varow o wielkosci ArgNo (lista argumentow dla danego kandydata)
-%generateCandidateArgNo(+LastVar, +ArgNo, -Dopasowanie, -NewValueOfLastVar)
-generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
+%generateCandidateArguments(+LastVar, +ArgNo, -Dopasowanie, -NewValueOfLastVar)
+generateCandidateArguments(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   constructOldList(ArgNo, LastVar, Stare), 
   length(Stare, IleStarych),
   IleNowych is ArgNo - IleStarych,
