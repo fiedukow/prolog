@@ -1,19 +1,26 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                   PROJEKT Z COBOLA                      %%
+%%            INDUKCJA REGUŁ - PROJEKT JPS                 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                                         %%
 %%   Autorzy:                                              %%
+%%      -> Marcin Bożek                                    %%
 %%      -> Andrzej Fiedukowicz                             %%
 %%      -> Maciej Grzybek                                  %%
+%%      -> Edward Miedziński                               %%
 %%                                                         %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-candidate(Relation, LastVar, Result) :-
-  findall(Dopasowania/LastVarAfter, generateCandidate(LastVar,Relation,Dopasowania,LastVarAfter), Result).
+showCandidates(LastVar) :-
+  findall(Cand/LastVarAfter, candidate(LastVar, Cand, LastVarAfter), List),
+  writeList(List), nl.
 
-pokazWszystko(LastVar, Relacja) :-
-  findall(Dopasowania/LastVarAfter, generateCandidate(LastVar,Relacja,Dopasowania,LastVarAfter), Lista),
-  writeList(Lista),nl.
+% Zwraca jako listę struktur rule_var, 
+% kolejnego kandydata dla zadanej relacji przy LastVar dotychczas uzytych zmiennych rule_var
+% candidate(+Relation, +LastVar, -Result)
+candidate(LastVar, Candidate, LastVarAfter) :-
+  setof(X/ArgNo, R^(op(R), functor(R,X,ArgNo)), Relations),
+  member(Relation, Relations),
+  generateCandidate(LastVar,Relation,Candidate,LastVarAfter).
 
 writeList([]).
 
@@ -21,18 +28,16 @@ writeList([E | Lista]) :-
   write(E), nl,
   writeList(Lista).
   
-generateFit([], _, _) :-
-  write('Tak byc nie moze!'), nl.
+generateCandidate(0, _, _, _) :-
+  !, write('Tak byc nie moze!'), nl,
+  fail.
 
 %przeklada relacje na ilosc jej arguementow bowiem zeby wygenerowac mozliwe dopasowania zmiennych
 %nie trzeba wiedziec do jakiej relacji dopasowywujemy ale tylko ile argumentow jest do dopasowania
 %oraz ile zmiennych zostalo uzytych do tej pory (licznik).
-generateCandidate(LastVar, Relacja, Dopasowanie, LastVarAfter) :-
-  op(RelExample),
-  functor(RelExample,Relacja,ArgNo), !, %ustalamy jaka krotnosc ma relacja, nie przegladamy wszystkich
-                                        %faktow operacyjnych dla danej relacji - odciecie.
-  write(ArgNo), nl,
-  generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter).
+generateCandidate(LastVar, Relacja/ArgNo, Cand, LastVarAfter) :-
+  generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter),
+  Cand =.. [Relacja|Dopasowanie].
 
 generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   constructOldList(ArgNo, LastVar, Stare), 
@@ -64,6 +69,9 @@ getVarBetween(Beg,End,Var) :-
   Beg1 is Beg + 1,
   getVarBetween(Beg1,End,Var).
 
+
+constructNList(N, List, LastVar, LastVarEnd) :-
+  constructNList(N, List, LastVar, LastVar, LastVarEnd).
 
 constructNList(0, [], _, X, X) :- !.
 
@@ -110,6 +118,7 @@ op(rodzic(franek, iga)).
 op(rodzic(gosia, darek)).
 op(rodzic(gosia, iga)).
 op(brat(darek, iga, ktos)).
+op(brat(darek, iga, kto)).
 op(siostra(iga, darek)).
 op(rodzenstwo(iga, darek)).
 op(rodzenstwo(darek, iga)).
