@@ -127,5 +127,3 @@ example(pos(dziadek(swirski, darek))).
 example(pos(babcia(dominika, iga))).
 example(pos(babcia(dominika, darek))).
 
-relations([ojciec/2,matka/7,mezczyzna/1,kobieta/1,rodzic/2,brat/3,siostra/2,rodzenstwo/2]).
-people([franek, darek, iga, gosia, swirski, dominika]).
