@@ -8,11 +8,8 @@
 %%                                                         %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-learn([Relacja | Zmienne]) :-
-  
-
-pokazWszystko(Zmienne, Relacja) :-
-  findall(Dopasowania, getAndFit(Zmienne,Relacja,Dopasowania), Lista),
+pokazWszystko(LastVar, Relacja) :-
+  findall(Dopasowania/LastVarAfter, generateFit(LastVar,Relacja,Dopasowania,LastVarAfter), Lista),
   writeList(Lista),nl.
 
 writeList([]).
@@ -21,47 +18,28 @@ writeList([E | Lista]) :-
   write(E), nl,
   writeList(Lista).
   
-filterOnlyCovered(Zmienne, Relacja, Dopasowanie) :-
-  example([Relacja | ConcreteVariables]),
-  
-
-getAndFit(Zmienne, Relacja, Dopasowania) :-
-  generateFit(Zmienne, Relacja, Wynik, DodaneZmienne),
-  append(Zmienne,DodaneZmienne,WszystkieZmienne),
-  fitVariables(WszystkieZmienne, Dopasowania).
-
-fitVariables(Zmienne, Dopasowania) :-
-  fitVariables(Zmienne, Dopasowania, []).
-
-fitVariables([], [], _).
-
-fitVariables([Zmienna | ResztaZmiennych], [Zmienna=Osoba | ResztaDopasowan], Zakazy) :-
-  people(People),
-  member(Osoba, People),
-  not(member(Osoba, Zakazy)),
-  fitVariables(ResztaZmiennych, ResztaDopasowan, [Osoba | Zakazy]).
-  
-  
 generateFit([], _, _) :-
   write('Tak byc nie moze!'), nl.
 
-generateFit(Zmienne, Relacja, Dopasowanie, DodaneZmienne) :-
+generateFit(LastVar, Relacja, Dopasowanie, LastVarAfter) :-
   relations(Relacje),
   member(Relacja/ArgNo, Relacje),
-  genFitKnownLimit(Zmienne, ArgNo, Dopasowanie, DodaneZmienne).
+  genFitKnownLimit(LastVar, ArgNo, Dopasowanie, LastVarAfter).
 
-genFitKnownLimit(Zmienne, ArgNo, Dopasowanie, Nowe) :-
-  constructOldList(ArgNo, Zmienne, Stare), 
+genFitKnownLimit(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
+  constructOldList(ArgNo, LastVar, Stare), 
   length(Stare, IleStarych),
   IleStarych > 0,
   IleNowych is ArgNo - IleStarych,
-  constructNList(IleNowych, Nowe), 
+  write('Nowych: '), write(IleNowych), write(' '), write(LastVar), nl,
+  constructNList(IleNowych, Nowe, LastVar, LastVar, LastVarAfter), 
+  write('OK'), nl,
   appendRandom(Nowe, Stare, Dopasowanie).
   
 constructOldList(0, _,  []) :- !.
 
-constructOldList(MaxLenght, Zmienne, Lista) :-
-  constructNListFromCands(MaxLenght, Lista, Zmienne).
+constructOldList(MaxLenght, VarOld, Lista) :-
+  constructNListFromCands(MaxLenght, Lista, VarOld).
 
 constructOldList(MaxLenght, Zmienne, Lista) :-
   MaxLenght1 is MaxLenght - 1, 
@@ -69,18 +47,42 @@ constructOldList(MaxLenght, Zmienne, Lista) :-
 
 constructNListFromCands(0, [], _) :- !.
 
-constructNListFromCands(N, [Zmienna | List], Cands) :-
+constructNListFromCands(N, [Var | List], VarOld) :-
   N > 0,
-  member(Zmienna, Cands),
+  getVarSmallerEqThen(VarOld, Var),
   N1 is N - 1, 
-  constructNListFromCands(N1, List, Cands).
+  constructNListFromCands(N1, List, VarOld).
 
-constructNList(0, []) :- !.
+getVarSmallerEqThen(Limit, rule_var(Limit)).
 
-constructNList(N, [N | List]) :-
+getVarSmallerEqThen(Limit, Result) :-
+  Limit > 1,
+  Limit1 is Limit - 1,
+  getVarSmallerEqThen(Limit1, Result).
+
+getVarBetween(Var,_,ruleVar(Var)).
+
+getVarBetween(Beg,End,Var) :-
+  Beg \= End,
+  Beg1 is Beg + 1,
+  getVarBetween(Beg1,End,Var).
+
+constructNList(0, [], _, X, X) :- !.
+
+constructNList(N, [rule_var(LastVarAfter1) | List], LastVar, LastVarAfter, LastVarEnd) :-
+  N > 0,
+  N1 is N - 1,
+  LastVarAfter1 is LastVarAfter + 1,
+  constructNList(N1, List, LastVar, LastVarAfter1, LastVarEnd). /*may be optymalized*/
+
+constructNList(N, [X | List], LastVar, LastVarAfter, LastVarEnd) :-
+  LastVarAfter > LastVar,
   N > 0,
   N1 is N - 1, 
-  constructNList(N1, List).
+  Beg is LastVar + 1,
+  End is LastVarAfter,
+  getVarBetween(Beg, End, X),
+  constructNList(N1, List, LastVar, LastVarAfter, LastVarEnd).
 
 appendRandom([], Lista2, Lista2) :- !.
 appendRandom(Lista1, [], Lista1) :- !.
@@ -92,22 +94,30 @@ appendRandom(Lista1, [P | Lista2Rest], [P | RestWynik]) :-
   appendRandom(Lista1, Lista2Rest, RestWynik).
   
   
-example([ojciec, franek, darek]).
-example([ojciec, franek, iga]). 
-example([matka, gosia, darek]). %
-example([matka, gosia, iga]).
-example([mezczyzna, franek]). %
-example([kobieta, gosia]).
-example([rodzic, franek, darek]). %
-example([rodzic, franek, iga]). %
-example([rodzic, gosia, darek]). %
-example([rodzic, gosia, iga]).
-example([brat, darek, iga]). %
-example([siostra, iga, darek]). %
-example([rodzenstwo, iga, darek]). %
-example([rodzenstwo, darek, iga]). %
-example([kobieta, iga]).
-example([mezczyzna, darek]). %
+op(ojciec(swirski, franek)).
+op(matka(dominika, franek)).
+op(kobieta(dominika)).
+op(mezczyzna(swirski)).
+op(ojciec(franek, darek)).
+op(ojciec(franek, iga)).
+op(matka(gosia, darek)).
+op(matka(gosia, iga)).
+op(mezczyzna(franek)).
+op(rodzic(franek, darek)).
+op(rodzic(franek, iga)).
+op(rodzic(gosia, darek)).
+op(rodzic(gosia, iga)).
+op(brat(darek, iga)).
+op(siostra(iga, darek)).
+op(rodzenstwo(iga, darek)).
+op(rodzenstwo(darek, iga)).
+op(kobieta(iga)).
+op(mezczyzna(darek)).
 
-relations([ojciec/2,matka/2,mezczyzna/1,kobieta/1,rodzic/2,brat/2,siostra/2,rodzenstwo/2]).
-people([franek, darek, iga, gosia]).
+example(pos(dziadek(swirski, iga))).
+example(pos(dziadek(swirski, darek))).
+example(pos(babcia(dominika, iga))).
+example(pos(babcia(dominika, darek))).
+
+relations([ojciec/2,matka/7,mezczyzna/1,kobieta/1,rodzic/2,brat/3,siostra/2,rodzenstwo/2]).
+people([franek, darek, iga, gosia, swirski, dominika]).
