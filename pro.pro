@@ -9,10 +9,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 candidate(Relation, LastVar, Result) :-
-  findall(Dopasowania/LastVarAfter, generateFit(LastVar,Relation,Dopasowania,LastVarAfter), Result).
+  findall(Dopasowania/LastVarAfter, generateCandidate(LastVar,Relation,Dopasowania,LastVarAfter), Result).
 
 pokazWszystko(LastVar, Relacja) :-
-  findall(Dopasowania/LastVarAfter, generateFit(LastVar,Relacja,Dopasowania,LastVarAfter), Lista),
+  findall(Dopasowania/LastVarAfter, generateCandidate(LastVar,Relacja,Dopasowania,LastVarAfter), Lista),
   writeList(Lista),nl.
 
 writeList([]).
@@ -27,22 +27,21 @@ generateFit([], _, _) :-
 %przeklada relacje na ilosc jej arguementow bowiem zeby wygenerowac mozliwe dopasowania zmiennych
 %nie trzeba wiedziec do jakiej relacji dopasowywujemy ale tylko ile argumentow jest do dopasowania
 %oraz ile zmiennych zostalo uzytych do tej pory (licznik).
-generateFit(LastVar, Relacja, Dopasowanie, LastVarAfter) :-
+generateCandidate(LastVar, Relacja, Dopasowanie, LastVarAfter) :-
   op(RelExample),
   functor(RelExample,Relacja,ArgNo), !, %ustalamy jaka krotnosc ma relacja, nie przegladamy wszystkich
                                         %faktow operacyjnych dla danej relacji - odciecie.
   write(ArgNo), nl,
-  genFitKnownLimit(LastVar, ArgNo, Dopasowanie, LastVarAfter).
+  generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter).
 
-genFitKnownLimit(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
+generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   constructOldList(ArgNo, LastVar, Stare), 
   length(Stare, IleStarych),
-  IleStarych > 0,
   IleNowych is ArgNo - IleStarych,
   constructNList(IleNowych, Nowe, LastVar, LastVar, LastVarAfter), 
   appendRandom(Nowe, Stare, Dopasowanie).
   
-constructOldList(0, _,  []) :- !.
+constructOldList(0, _,  []) :- !, fail.
 
 constructOldList(MaxLenght, VarOld, Lista) :-
   constructNListFromCands(MaxLenght, Lista, VarOld).
@@ -54,22 +53,14 @@ constructOldList(MaxLenght, Zmienne, Lista) :-
 constructNListFromCands(0, [], _) :- !.
 
 constructNListFromCands(N, [Var | List], VarOld) :-
-  N > 0,
-  getVarSmallerEqThen(VarOld, Var),
   N1 is N - 1, 
+  getVarBetween(1, VarOld, Var),
   constructNListFromCands(N1, List, VarOld).
-
-getVarSmallerEqThen(Limit, rule_var(Limit)).
-
-getVarSmallerEqThen(Limit, Result) :-
-  Limit > 1,
-  Limit1 is Limit - 1,
-  getVarSmallerEqThen(Limit1, Result).
 
 getVarBetween(Var,_,ruleVar(Var)).
 
 getVarBetween(Beg,End,Var) :-
-  Beg \= End,
+  Beg < End,
   Beg1 is Beg + 1,
   getVarBetween(Beg1,End,Var).
 
