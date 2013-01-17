@@ -14,9 +14,8 @@ showCandidates(LastVar) :-
   findall(Cand/LastVarAfter, candidate(LastVar, Cand, LastVarAfter), List),
   writeList(List), nl.
 
-% Zwraca jako listę struktur rule_var, 
-% kolejnego kandydata dla zadanej relacji przy LastVar dotychczas uzytych zmiennych rule_var
-% candidate(+Relation, +LastVar, -Result)
+% Zwraca kolejnych kandydatow z zalozeniem ze do  tej pory uzyto LastVar zmiennych rule_var 
+% candidate(+LastVar, -Candidate, -NewValueOfLastVar)
 candidate(LastVar, Candidate, LastVarAfter) :-
   setof(X/ArgNo, R^(op(R), functor(R,X,ArgNo)), Relations),
   member(Relation, Relations),
@@ -46,21 +45,27 @@ generateCandidateArgNo(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   constructNList(IleNowych, Nowe, LastVar, LastVar, LastVarAfter), 
   appendRandom(Nowe, Stare, Dopasowanie).
   
+%konstruuje liste zmiennych o dlugosci mniejszej lub rownej MaxLenght
+%ta funkcja NIE może dodawać swoich zmiennych, może tylko wykorzystywać stare
+%constructOldList(+MaxLenght, +LastVar, -ListOfVariables)
 constructOldList(0, _,  []) :- !, fail.
 
 constructOldList(MaxLenght, VarOld, Lista) :-
-  constructNListFromCands(MaxLenght, Lista, VarOld).
+  constructNListFromCands(MaxLenght, VarOld, Lista).
 
 constructOldList(MaxLenght, Zmienne, Lista) :-
   MaxLenght1 is MaxLenght - 1, 
   constructOldList(MaxLenght1, Zmienne, Lista).
 
-constructNListFromCands(0, [], _) :- !.
+%konstruuje liste zmiennych o dlugosci rownej Length
+%ta funkcja NIE może dodawać swoich zmiennych, może tylko wykorzystywać stare
+%constructNListFromCands(+Length, +LastVar, -ListOfVariables)
+constructNListFromCands(0, _, []) :- !.
 
-constructNListFromCands(N, [Var | List], VarOld) :-
+constructNListFromCands(N, VarOld, [Var | List]) :-
   N1 is N - 1, 
   getVarBetween(1, VarOld, Var),
-  constructNListFromCands(N1, List, VarOld).
+  constructNListFromCands(N1, VarOld, List).
 
 getVarBetween(Var,_,ruleVar(Var)).
 
