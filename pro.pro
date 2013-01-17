@@ -8,6 +8,9 @@
 %%                                                         %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+candidate(Relation, LastVar, Result) :-
+  findall(Dopasowania/LastVarAfter, generateFit(LastVar,Relation,Dopasowania,LastVarAfter), Result).
+
 pokazWszystko(LastVar, Relacja) :-
   findall(Dopasowania/LastVarAfter, generateFit(LastVar,Relacja,Dopasowania,LastVarAfter), Lista),
   writeList(Lista),nl.
@@ -21,9 +24,14 @@ writeList([E | Lista]) :-
 generateFit([], _, _) :-
   write('Tak byc nie moze!'), nl.
 
+%przeklada relacje na ilosc jej arguementow bowiem zeby wygenerowac mozliwe dopasowania zmiennych
+%nie trzeba wiedziec do jakiej relacji dopasowywujemy ale tylko ile argumentow jest do dopasowania
+%oraz ile zmiennych zostalo uzytych do tej pory (licznik).
 generateFit(LastVar, Relacja, Dopasowanie, LastVarAfter) :-
-  relations(Relacje),
-  member(Relacja/ArgNo, Relacje),
+  op(RelExample),
+  functor(RelExample,Relacja,ArgNo), !, %ustalamy jaka krotnosc ma relacja, nie przegladamy wszystkich
+                                        %faktow operacyjnych dla danej relacji - odciecie.
+  write(ArgNo), nl,
   genFitKnownLimit(LastVar, ArgNo, Dopasowanie, LastVarAfter).
 
 genFitKnownLimit(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
@@ -31,9 +39,7 @@ genFitKnownLimit(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   length(Stare, IleStarych),
   IleStarych > 0,
   IleNowych is ArgNo - IleStarych,
-  write('Nowych: '), write(IleNowych), write(' '), write(LastVar), nl,
   constructNList(IleNowych, Nowe, LastVar, LastVar, LastVarAfter), 
-  write('OK'), nl,
   appendRandom(Nowe, Stare, Dopasowanie).
   
 constructOldList(0, _,  []) :- !.
@@ -69,12 +75,14 @@ getVarBetween(Beg,End,Var) :-
 
 constructNList(0, [], _, X, X) :- !.
 
+%wersja dodajaca nowa zmienna do aktualnej listy
 constructNList(N, [rule_var(LastVarAfter1) | List], LastVar, LastVarAfter, LastVarEnd) :-
   N > 0,
   N1 is N - 1,
   LastVarAfter1 is LastVarAfter + 1,
-  constructNList(N1, List, LastVar, LastVarAfter1, LastVarEnd). /*may be optymalized*/
+  constructNList(N1, List, LastVar, LastVarAfter1, LastVarEnd).
 
+%wersja korzystajaca z nowo dodanych zmiennych ale nie dodajaca wlasnych
 constructNList(N, [X | List], LastVar, LastVarAfter, LastVarEnd) :-
   LastVarAfter > LastVar,
   N > 0,
@@ -107,7 +115,7 @@ op(rodzic(franek, darek)).
 op(rodzic(franek, iga)).
 op(rodzic(gosia, darek)).
 op(rodzic(gosia, iga)).
-op(brat(darek, iga)).
+op(brat(darek, iga, ktos)).
 op(siostra(iga, darek)).
 op(rodzenstwo(iga, darek)).
 op(rodzenstwo(darek, iga)).
