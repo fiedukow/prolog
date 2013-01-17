@@ -21,6 +21,8 @@ candidate(LastVar, Candidate, LastVarAfter) :-
   member(Relation, Relations),
   generateCandidate(LastVar,Relation,Candidate,LastVarAfter).
 
+% Funkcja pomocnicza wypisujaca kolejne elementy listy w nowych liniach
+% writeList(+List)
 writeList([]).
 
 writeList([E | Lista]) :-
@@ -83,6 +85,14 @@ getVarBetween(Beg,End,Var) :-
 constructNList(N, List, LastVar, LastVarEnd) :-
   constructNList(N, List, LastVar, LastVar, LastVarEnd).
 
+%Tworzy liste zmiennych dlugosci N korzystajac tylko z nowych zmiennych
+%W szczegolnosci nowe zmienne moga byc wykorzystane wielokrotnie
+%Zwraca nowa wartosc LastVar.
+%Wersja z dodatkowym argumentem LastVarAfter ktory jest inkrementowany
+%przy przejsciach przez wersje funkcji dodajaca nowe zmienne
+%a na koniec przepisywany jako LastVarEnd.
+%Z tej funkcji nalezy korzystac przez zaslepke 4ro argumentowa
+%constructNList(+N, -List, +LastVar, +LastVarAfter, -LastVarEnd).
 constructNList(0, [], _, X, X) :- !.
 
 %wersja dodajaca nowa zmienna do aktualnej listy
