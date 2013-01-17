@@ -64,11 +64,11 @@ getVarBetween(Beg,End,Var) :-
   Beg1 is Beg + 1,
   getVarBetween(Beg1,End,Var).
 
+
 constructNList(0, [], _, X, X) :- !.
 
 %wersja dodajaca nowa zmienna do aktualnej listy
 constructNList(N, [rule_var(LastVarAfter1) | List], LastVar, LastVarAfter, LastVarEnd) :-
-  N > 0,
   N1 is N - 1,
   LastVarAfter1 is LastVarAfter + 1,
   constructNList(N1, List, LastVar, LastVarAfter1, LastVarEnd).
@@ -76,13 +76,16 @@ constructNList(N, [rule_var(LastVarAfter1) | List], LastVar, LastVarAfter, LastV
 %wersja korzystajaca z nowo dodanych zmiennych ale nie dodajaca wlasnych
 constructNList(N, [X | List], LastVar, LastVarAfter, LastVarEnd) :-
   LastVarAfter > LastVar,
-  N > 0,
   N1 is N - 1, 
   Beg is LastVar + 1,
   End is LastVarAfter,
   getVarBetween(Beg, End, X),
   constructNList(N1, List, LastVar, LastVarAfter, LastVarEnd).
 
+
+%Losowe laczenie dwoch list z zachowaniem kolejnosci w obrebie elementow
+%pochodzacych z list pierwotnych
+%np [a,b], [c,d] -> [a,b,c,d], [a,c,b,d], [a,c,d,b], [c,d,a,b], [c,a,d,b], [c,a,b,d]
 appendRandom([], Lista2, Lista2) :- !.
 appendRandom(Lista1, [], Lista1) :- !.
 
