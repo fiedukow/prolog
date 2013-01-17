@@ -56,7 +56,7 @@ generateCandidateArguments(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
 constructOldList(0, _,  []) :- !, fail.
 
 constructOldList(MaxLenght, VarOld, Lista) :-
-  constructNListFromCands(MaxLenght, VarOld, Lista).
+  constructNListOld(MaxLenght, VarOld, Lista).
 
 constructOldList(MaxLenght, Zmienne, Lista) :-
   MaxLenght1 is MaxLenght - 1, 
@@ -64,13 +64,13 @@ constructOldList(MaxLenght, Zmienne, Lista) :-
 
 %konstruuje liste zmiennych o dlugosci rownej Length
 %ta funkcja NIE może dodawać swoich zmiennych, może tylko wykorzystywać stare
-%constructNListFromCands(+Length, +LastVar, -ListOfVariables)
-constructNListFromCands(0, _, []) :- !.
+%constructNListOld(+Length, +LastVar, -ListOfVariables)
+constructNListOld(0, _, []) :- !.
 
-constructNListFromCands(N, VarOld, [Var | List]) :-
+constructNListOld(N, VarOld, [Var | List]) :-
   N1 is N - 1, 
   getVarBetween(1, VarOld, Var),
-  constructNListFromCands(N1, VarOld, List).
+  constructNListOld(N1, VarOld, List).
 
 %tworzy kolejne zmienne z zakresu od Beg do End (wlaczajac Beg i End)
 %getVarBetween(+Beg,+End,-Var)
