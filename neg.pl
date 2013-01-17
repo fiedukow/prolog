@@ -8,7 +8,7 @@ generateNegativeExample(Output) :-
   removeDuplications(ExtractedAttrs,ExtractedSet),
   combineSetOfElements(ExtractedSet,Output).
 
-% wyciagamy osoby
+% wyciagamy osoby (zdzich, janek, jurek etc.)
 extractAttributes(Output) :-
   findall(Mem,
             (example(pos(A)),
@@ -28,7 +28,7 @@ combineSetOfElements(Input,Output) :-
   extractPredicates(Predicates),
   removeDuplications(Predicates,Preds),!, % optimization
   getArity(Preds,Name/Arity),
-  generateCombination(Arity,Input,Combination),
+  generateCombinationRep(Arity,Input,Combination),
   Output =.. [Name,Combination].
 
 getArity([],[]).
@@ -36,7 +36,7 @@ getArity([Name/Arity|_],Name/Arity).
 getArity([_|Rest],Output) :-
   getArity(Rest,Output).
 
-% wyciagnij predykaty (dziadek, babcia, etc.)
+% wyciagnij predykaty (dziadek/2, babcia/2, mezyczyna/1 etc.)
 extractPredicates(Output) :-
   findall(Name/Arity,(example(pos(A)),
                       functor(A,Name,Arity)),
@@ -57,12 +57,12 @@ removeAll(Element,[X|InputList],[X|OutputList]) :-
   Element \= X,
   removeAll(Element,InputList,OutputList).
 
-generateCombination(0,_,[]).
-generateCombination(N,[X|T],[X|Comb]) :-
+generateCombinationRep(0,_,[]).
+generateCombinationRep(N,[X|T],[X|Comb]) :-
   N>0,
   N1 is N-1,
-  generateCombination(N1,[X|T],Comb).
-generateCombination(N,[_|T],Comb) :- 
+  generateCombinationRep(N1,[X|T],Comb).
+generateCombinationRep(N,[_|T],Comb) :- 
   N>0,
-  generateCombination(N,T,Comb).
+  generateCombinationRep(N,T,Comb).
 
