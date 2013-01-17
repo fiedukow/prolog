@@ -10,6 +10,8 @@
 %%                                                         %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Tymczasowa funkcja pokazujaca wszystkich kandydatow dla danej wartosci
+% ilosci dotychczas uzytych zmiennych.
 showCandidates(LastVar) :-
   findall(Cand/LastVarAfter, candidate(LastVar, Cand, LastVarAfter), List),
   writeList(List), nl.
@@ -47,7 +49,7 @@ generateCandidateArguments(LastVar, ArgNo, Dopasowanie, LastVarAfter) :-
   constructOldList(ArgNo, LastVar, Stare), 
   length(Stare, IleStarych),
   IleNowych is ArgNo - IleStarych,
-  constructNList(IleNowych, Nowe, LastVar, LastVarAfter), 
+  constructNList(IleNowych, LastVar, Nowe, LastVarAfter), 
   appendRandom(Nowe, Stare, Dopasowanie).
   
 %konstruuje liste zmiennych o dlugosci mniejszej lub rownej MaxLenght
@@ -84,9 +86,9 @@ getVarBetween(Beg,End,Var) :-
 %Tworzy liste zmiennych dlugosci N korzystajac tylko z nowych zmiennych
 %W szczegolnosci nowe zmienne moga byc wykorzystane wielokrotnie
 %Zwraca nowa wartosc LastVar!
-%constructNList(+N, -List, +LastVar, -NewValueOfLastVar)
-constructNList(N, List, LastVar, LastVarEnd) :-
-  constructNList(N, List, LastVar, LastVar, LastVarEnd).
+%constructNList(+N, +LastVar, -List, -NewValueOfLastVar)
+constructNList(N, LastVar, List, LastVarEnd) :-
+  constructNList(N, LastVar, LastVar, List, LastVarEnd).
 
 %Tworzy liste zmiennych dlugosci N korzystajac tylko z nowych zmiennych
 %W szczegolnosci nowe zmienne moga byc wykorzystane wielokrotnie
@@ -95,23 +97,23 @@ constructNList(N, List, LastVar, LastVarEnd) :-
 %przy przejsciach przez wersje funkcji dodajaca nowe zmienne
 %a na koniec przepisywany jako LastVarEnd.
 %Z tej funkcji nalezy korzystac przez zaslepke 4ro argumentowa
-%constructNList(+N, -List, +LastVar, +LastVarAfter, -LastVarEnd).
-constructNList(0, [], _, X, X) :- !.
+%constructNList(+N, +LastVar, +LastVarAfter, -List, -LastVarEnd).
+constructNList(0, _, X, [], X) :- !.
 
 %wersja dodajaca nowa zmienna do aktualnej listy
-constructNList(N, [rule_var(LastVarAfter1) | List], LastVar, LastVarAfter, LastVarEnd) :-
+constructNList(N, LastVar, LastVarAfter, [rule_var(LastVarAfter1) | List], LastVarEnd) :-
   N1 is N - 1,
   LastVarAfter1 is LastVarAfter + 1,
-  constructNList(N1, List, LastVar, LastVarAfter1, LastVarEnd).
+  constructNList(N1, LastVar, LastVarAfter1, List, LastVarEnd).
 
 %wersja korzystajaca z nowo dodanych zmiennych ale nie dodajaca wlasnych
-constructNList(N, [X | List], LastVar, LastVarAfter, LastVarEnd) :-
+constructNList(N, LastVar, LastVarAfter, [X | List], LastVarEnd) :-
   LastVarAfter > LastVar,
   N1 is N - 1, 
   Beg is LastVar + 1,
   End is LastVarAfter,
   getVarBetween(Beg, End, X),
-  constructNList(N1, List, LastVar, LastVarAfter, LastVarEnd).
+  constructNList(N1, LastVar, LastVarAfter, List, LastVarEnd).
 
 
 %Losowe laczenie dwoch list z zachowaniem kolejnosci w obrebie elementow
