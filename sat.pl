@@ -1,16 +1,11 @@
-example(pos(dziadek(dziadekEdka,edek))).
-example(pos(ojciec(ojciecEdka,edek))).
-example(pos(ojciec(dziadekEdka,ojciecEdka))).
+% Examples of usage:
+%  covered(3,[ojciec(ojciecEdka,edek),ojciec(dziadekEdka,ojciecEdka),dziadek(dziadekEdka,edek)],dziadek(rule_var(1),rule_var(2)),[ojciec(rule_var(3),rule_var(2)),ojciec(rule_var(1),rule_var(3))]).
 
-% [[dziadek,edek,chuj],...]
-% [dziadek(edek,chuj),...]
-satisfy(Successor,Examples,Conjunction,OutputList) :-
-  findall(Covered,
-                  (member(Covered,Examples),
-                   covered(Examples,Covered,Conjunction)),
-                  OutputList).
-
-lastVar(3).
+%satisfy(Successor,Examples,Conjunction,OutputList) :-
+%  findall(Covered,
+%                  (member(Covered,Examples),
+%                   covered(Examples,Covered,Conjunction)),
+%                  OutputList).
 
 %coveredExt(Object,Conjunction) :-
 %  lastVar(RuleVarNum), % ilosc rule_var'ow w systemie
@@ -19,33 +14,52 @@ lastVar(3).
 % Object = dziadek(rule_var(1),rule_var(2))
 % Conjunction = [ojciec(rule_var(3),rule_var(2)), ojciec(rule_var(1),rule_var(3))]
 
-%sprawdza czy Conjunction pokrywa Object w kontekscie Examples
-covered(Examples,Object,Conjunction) :-
-  lastVar(RuleVarNum),
+%Sprawdza czy Conjunction pokrywa Object w kontekscie Examples
+%RuleVarNum to maksymalny indeks w rule_var(X),
+% przechowujemy liczbe, zeby uniknac przechowywania listy rule_var'ow
+%Examples w postaci relacja(argument1,argument2,...)
+%Object to nastepnik implikacji (do udowodnienia, bez uzgodnionych zmiennych (rule_var zamiast zmiennej)
+%Conjunction to koniunkcja Cond'ow, reprezentowana jako lista relacji, bez uzgodnionych zmiennych (rule_vary).
+%
+%covered(+RuleVarNum,+Examples,+Object,+Conjunction).
+covered(RuleVarNum,Examples,Object,Conjunction) :-
   extractPeople(Examples,People),
   generateAssocList(People,RuleVarNum,AssocList),
-  coversCond(Examples,Conjunction,AssocList,Output),
-  Object =.. [Successor|RuleVars], %sprawdz czy dziadek(), dla podanych rule_var(1),rule_var(2)
+  coversCond(Examples,Conjunction,AssocList),
+  Object =.. [Successor|RuleVars],
   assocLists(RuleVars,AssocList,AssociatedVars),
   ReadyRule =.. [Successor|AssociatedVars],
   checkExamples(Examples,[ReadyRule]).
   
 
 %iteruje po elementach listy i weryfikuje czy po podstawieniu (rule_var) pokrywa przyklady
-coversCond(_,[],_,[]) :- !.
-coversCond(Examples,[Cond|Rest],AssocList,[ReadyRule|Output]) :-
+%Examples lista przykladow, patrz covered
+%Conjunction koniunkcja Cond'ów, patrz covered
+%AssocList lista dopasowan, postaci 1=a, 2=b, ...
+%Output lista Cond'ów z podstawieniami
+%coversCond(+Examples,+Conjunction,+AssocList)
+coversCond(Examples,Conjunction,AssocList) :-
+  coversCondImpl(Examples,Conjunction,AssocList,_).
+
+coversCondImpl(_,[],_,[]) :- !.
+coversCondImpl(Examples,[Cond|Rest],AssocList,[ReadyRule|Output]) :-
 %  getElement(Conjunction,[Pred|RuleVars]), % wyciagnij kolejny element z Conjunction
   Cond =.. [Pred|RuleVars],
   assocLists(RuleVars,AssocList,ReadyRuleVars),
   ReadyRule =.. [Pred|ReadyRuleVars],
-  coversCond(Examples,Rest,AssocList,Output),
+  coversCondImpl(Examples,Rest,AssocList,Output),
   checkExamples(Examples,Output).
 
+%sprawdza czy zbudowane (przy zasocjowanych rule_var'y->zmienne) kazdy Cond ma pokrycie w Examplach
+%checkExamples(+Examples,+Predicates).
 checkExamples(_,[]) :- !.
 checkExamples(Examples,[X|Predicates]) :-
   checkExamples(Examples,Predicates),
   member(X,Examples),!.
 
+%buduje liste dopasowan na podstawie listy asocjacji
+%np. dla RuleVars = [rule_var(1),rule_var(2)], AssocList = [1=a,2=b], Output daje postaci [a, b]
+%assocLists(+RuleVars,+AssocList,-Output)
 assocLists([],_,[]).
 assocLists([R|RuleVars],AssocList,[X|Output]) :-
   getAssocVar(AssocList,R,X),
