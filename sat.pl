@@ -1,5 +1,5 @@
 % Examples of usage:
-%  covered(3,[ojciec(ojciecEdka,edek),ojciec(dziadekEdka,ojciecEdka),dziadek(dziadekEdka,edek)],dziadek(rule_var(1),rule_var(2)),[ojciec(rule_var(3),rule_var(2)),ojciec(rule_var(1),rule_var(3))]).
+%  covered(3,[dziadekEdka,ojciecEdka,edek],[ojciec(ojciecEdka,edek),ojciec(dziadekEdka,ojciecEdka)],[dziadek(dziadekEdka,edek)],dziadek(rule_var(1),rule_var(2)),[ojciec(rule_var(3),rule_var(2)),ojciec(rule_var(1),rule_var(3))]).
 
 %satisfy(Successor,Examples,Conjunction,OutputList) :-
 %  findall(Covered,
@@ -21,11 +21,10 @@
 %Object to nastepnik implikacji (do udowodnienia, bez uzgodnionych zmiennych (rule_var zamiast zmiennej)
 %Conjunction to koniunkcja Cond'ow, reprezentowana jako lista relacji, bez uzgodnionych zmiennych (rule_vary).
 %
-%covered(+RuleVarNum,+Examples,+Object,+Conjunction).
-covered(RuleVarNum,Examples,Object,Conjunction) :-
-  extractPeople(Examples,People),
+%covered(+RuleVarNum,+OPs,+Examples,+Object,+Conjunction).
+covered(RuleVarNum,People,OPs,Examples,Object,Conjunction) :-
   generateAssocList(People,RuleVarNum,AssocList),
-  coversCond(Examples,Conjunction,AssocList),
+  coversCond(OPs,Conjunction,AssocList),
   Object =.. [Successor|RuleVars],
   assocLists(RuleVars,AssocList,AssociatedVars),
   ReadyRule =.. [Successor|AssociatedVars],
