@@ -1,27 +1,26 @@
-pos(dziadek(zdzich,janek)).
-pos(dziadek(jurek,benek)).
-pos(babcia(iga,benek)).
-pos(mezczyzna(marek)).
+example(pos(dziadek(zdzich,janek))).
+example(pos(dziadek(jurek,benek))).
+example(pos(babcia(iga,benek))).
+example(pos(mezczyzna(marek))).
 
 generateNegativeExamples :-
-  generateNegativeExample,
+  generateNegativeExample(Output),
+  write('example(neg('),write(Output),write(')).'),nl,
   fail.
 
 generateNegativeExamples.
 
-generateNegativeExample :-
+generateNegativeExample(Output) :-
   extractAttributes(ExtractedAttrs),
   removeDuplications(ExtractedAttrs,ExtractedSet),
-  combineSetOfElements(ExtractedSet,Output),
-  assert(neg(Output)).
+  combineSetOfElements(ExtractedSet,Output).
 
 % wyciagamy osoby (zdzich, janek, jurek etc.)
 extractAttributes(Output) :-
   findall(Mem,
-            (pos(A),
-             A =.. List,
-             removeFirstN(List,1,Out),
-             member(Mem,Out)),
+            (example(pos(A)),
+             A =.. [_|List],
+             member(Mem,List)),
             Output).
 
 % usun powtorzenia na InputList
@@ -36,7 +35,7 @@ combineSetOfElements(Input,Output) :-
   removeDuplications(Predicates,Preds),!, % optimization
   getArity(Preds,Name/Arity),
   generateCombinationRep(Arity,Input,Combination),
-  Output =.. [Name,Combination].
+  Output =.. [Name|Combination].
 
 getArity([],[]).
 getArity([Name/Arity|_],Name/Arity).
@@ -45,16 +44,9 @@ getArity([_|Rest],Output) :-
 
 % wyciagnij predykaty (dziadek/2, babcia/2, mezyczyna/1 etc.)
 extractPredicates(Output) :-
-  findall(Name/Arity,(pos(A),
+  findall(Name/Arity,(example(pos(A)),
                       functor(A,Name,Arity)),
                       Output).
-
-% usun pierwsze N elementow listy
-removeFirstN(Input,0,Input).
-removeFirstN([_|Input],N,Output) :-
-  N > 0,
-  N1 is N-1,
-  removeFirstN(Input,N1,Output).
 
 % usun wszystkie wystapienia Element z InputList
 removeAll(_,[],[]).
