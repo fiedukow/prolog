@@ -123,15 +123,4 @@ writelist([X | L])  :-
    tab(2), write(X), nl,
    writelist(L).
 
-%====== EXAMPLES ======
-
-example(classA,[colour=blue,size=small]).
-example(classB,[colour=green,size=big]).
-example(classB,[colour=blue,size=big]).
-example(classA,[colour=green,size=medium]).
-example(classC,[colour=green,size=small]).
-
-
-
-attribute(colour,[blue,green]).
-attribute(size,[small,big,medium]).
+:- [examples].
