@@ -1,9 +1,14 @@
 % Examples of usage:
 %  covered(3,[dziadekEdka,ojciecEdka,edek],[ojciec(ojciecEdka,edek),ojciec(dziadekEdka,ojciecEdka)],[dziadek(dziadekEdka,edek)],dziadek(rule_var(1),rule_var(2)),[ojciec(rule_var(3),rule_var(2)),ojciec(rule_var(1),rule_var(3))]).
+%  SO DIRTY CODE, DON'T LOOK BELOW.
+%  ANDRZEJ FORCED ME TO COMMIT THIS :(((((((((((((
+%  I WILL REPAIR THIS SOON, PLEASE FORGIVE ME, GOD!
 
 op(ojciec(ojciecEdka,edek)).
 op(ojciec(dziadekEdka,ojciecEdka)).
 op(ojciec(pradziadekEdka,dziadekEdka)).
+dziadek(dziadekEdka,edek).
+people([dziadekEdka,edek,ojciecEdka]).
 
 %satisfy(Successor,Examples,Conjunction,OutputList) :-
 %  findall(Covered,
@@ -38,7 +43,22 @@ covered(RuleVarNum,Examples,Object,Conjunction) :-
   ReadyRule =.. [Successor|AssociatedVars],
   checkExamples(Examples,[ReadyRule]),
   coversCond(Conjunction,AssocList).
+
+satisfy(LastVar,Example,Conjunction) :-
+  people(People),
+  generateAssocList(People,LastVar,AssocList),
+  Example =.. [Successor|Vars],
+  assocLists([rule_var(1),rule_var(2)],AssocList,AssociatedVars),
+  equal(AssociatedVars,Vars),
+  ReadyRule =.. [Successor|AssociatedVars],
+  call(ReadyRule),
+%  checkExamples(Example,[ReadyRule]),
+  coversCond(Conjunction,AssocList).
   
+equal([],[]).
+equal([X|L1],[X|L2]) :-
+  equal(L1,L2).
+
 
 %iteruje po elementach listy i weryfikuje czy po podstawieniu (rule_var) pokrywa przyklady
 %Examples lista przykladow, patrz covered
