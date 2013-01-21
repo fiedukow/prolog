@@ -14,6 +14,10 @@
 % Object = dziadek(rule_var(1),rule_var(2))
 % Conjunction = [ojciec(rule_var(3),rule_var(2)), ojciec(rule_var(1),rule_var(3))]
 
+%Interfejs opakowujacy Przyklad - podaje jako liste jednoelementowa do dalszej obrobki.
+satisfy(RuleVarNum,People,OPs,Example,Object,Conjunction) :-
+  covered(RuleVarNum,People,OPs,[Example],Object,Conjunction).
+
 %Sprawdza czy Conjunction pokrywa Object w kontekscie Examples
 %RuleVarNum to maksymalny indeks w rule_var(X),
 % przechowujemy liczbe, zeby uniknac przechowywania listy rule_var'ow
@@ -24,11 +28,11 @@
 %covered(+RuleVarNum,+OPs,+Examples,+Object,+Conjunction).
 covered(RuleVarNum,People,OPs,Examples,Object,Conjunction) :-
   generateAssocList(People,RuleVarNum,AssocList),
-  coversCond(OPs,Conjunction,AssocList),
   Object =.. [Successor|RuleVars],
   assocLists(RuleVars,AssocList,AssociatedVars),
   ReadyRule =.. [Successor|AssociatedVars],
-  checkExamples(Examples,[ReadyRule]).
+  checkExamples(Examples,[ReadyRule]),
+  coversCond(OPs,Conjunction,AssocList).
   
 
 %iteruje po elementach listy i weryfikuje czy po podstawieniu (rule_var) pokrywa przyklady
