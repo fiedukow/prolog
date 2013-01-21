@@ -1,17 +1,24 @@
-example(pos(dziadek(zdzich,janek))).
-example(pos(dziadek(jurek,benek))).
-example(pos(babcia(iga,benek))).
-example(pos(mezczyzna(marek))).
+pos(dziadek(zdzich,janek)).
+pos(dziadek(jurek,benek)).
+pos(babcia(iga,benek)).
+pos(mezczyzna(marek)).
 
-generateNegativeExample(Output) :-
+generateNegativeExamples :-
+  generateNegativeExample,
+  fail.
+
+generateNegativeExamples.
+
+generateNegativeExample :-
   extractAttributes(ExtractedAttrs),
   removeDuplications(ExtractedAttrs,ExtractedSet),
-  combineSetOfElements(ExtractedSet,Output).
+  combineSetOfElements(ExtractedSet,Output),
+  assert(neg(Output)).
 
 % wyciagamy osoby (zdzich, janek, jurek etc.)
 extractAttributes(Output) :-
   findall(Mem,
-            (example(pos(A)),
+            (pos(A),
              A =.. List,
              removeFirstN(List,1,Out),
              member(Mem,Out)),
@@ -38,7 +45,7 @@ getArity([_|Rest],Output) :-
 
 % wyciagnij predykaty (dziadek/2, babcia/2, mezyczyna/1 etc.)
 extractPredicates(Output) :-
-  findall(Name/Arity,(example(pos(A)),
+  findall(Name/Arity,(pos(A),
                       functor(A,Name,Arity)),
                       Output).
 
