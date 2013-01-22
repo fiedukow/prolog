@@ -4,11 +4,7 @@
 %  ANDRZEJ FORCED ME TO COMMIT THIS :(((((((((((((
 %  I WILL REPAIR THIS SOON, PLEASE FORGIVE ME, GOD!
 
-op(ojciec(ojciecEdka,edek)).
-op(ojciec(dziadekEdka,ojciecEdka)).
-op(ojciec(pradziadekEdka,dziadekEdka)).
-dziadek(dziadekEdka,edek).
-people([dziadekEdka,edek,ojciecEdka]).
+:- [examples].
 
 %satisfy(Successor,Examples,Conjunction,OutputList) :-
 %  findall(Covered,
@@ -24,8 +20,8 @@ people([dziadekEdka,edek,ojciecEdka]).
 % Conjunction = [ojciec(rule_var(3),rule_var(2)), ojciec(rule_var(1),rule_var(3))]
 
 %Interfejs opakowujacy Przyklad - podaje jako liste jednoelementowa do dalszej obrobki.
-satisfy(RuleVarNum,Example,Object,Conjunction) :-
-  covered(RuleVarNum,[Example],Object,Conjunction).
+%satisfy(RuleVarNum,Example,Object,Conjunction) :-
+%  covered(RuleVarNum,[Example],Object,Conjunction).
 
 %Sprawdza czy Conjunction pokrywa Object w kontekscie Examples
 %RuleVarNum to maksymalny indeks w rule_var(X),
@@ -35,25 +31,29 @@ satisfy(RuleVarNum,Example,Object,Conjunction) :-
 %Conjunction to koniunkcja Cond'ow, reprezentowana jako lista relacji, bez uzgodnionych zmiennych (rule_vary).
 %
 %covered(+RuleVarNum,+Examples,+Object,+Conjunction).
-covered(RuleVarNum,Examples,Object,Conjunction) :-
-  extractPeople(Examples,People),
-  generateAssocList(People,RuleVarNum,AssocList),
-  Object =.. [Successor|RuleVars],
-  assocLists(RuleVars,AssocList,AssociatedVars),
-  ReadyRule =.. [Successor|AssociatedVars],
-  checkExamples(Examples,[ReadyRule]),
+
+%covered(RuleVarNum,Examples,Object,Conjunction) :-
+%  extractPeople(Examples,People),
+%  generateAssocList(People,RuleVarNum,AssocList),
+%  Object =.. [Successor|RuleVars],
+%  assocLists(RuleVars,AssocList,AssociatedVars),
+%  ReadyRule =.. [Successor|AssociatedVars],
+%  checkExamples(Examples,[ReadyRule]),
+%  coversCond(Conjunction,AssocList).
+
+satisfy(RuleVarNum,Example,Conjunction) :-
+  people(People),
+  Example =.. [Relation|Args],
+  generateAssocList(People,RuleVarNum,Args,AssocList),
   coversCond(Conjunction,AssocList).
 
-satisfy(LastVar,Example,Conjunction) :-
-  people(People),
-  generateAssocList(People,LastVar,AssocList),
-  Example =.. [Successor|Vars],
-  assocLists([rule_var(1),rule_var(2)],AssocList,AssociatedVars),
-  equal(AssociatedVars,Vars),
-  ReadyRule =.. [Successor|AssociatedVars],
-  call(ReadyRule),
-%  checkExamples(Example,[ReadyRule]),
-  coversCond(Conjunction,AssocList).
+%satisfy(LastVar,Example,Conjunction) :-
+%  people(People),
+%  generateAssocList(People,LastVar,AssocList),
+%  Example =.. [_|Vars],
+%  assocLists([rule_var(1),rule_var(2)],AssocList,AssociatedVars),
+%  equal(AssociatedVars,Vars),
+%  coversCond(Conjunction,AssocList).
   
 equal([],[]).
 equal([X|L1],[X|L2]) :-
@@ -74,8 +74,9 @@ coversCondImpl([Cond|Rest],AssocList,[ReadyRule|Output]) :-
   Cond =.. [Pred|RuleVars],
   assocLists(RuleVars,AssocList,ReadyRuleVars),
   ReadyRule =.. [Pred|ReadyRuleVars],
-  coversCondImpl(Rest,AssocList,Output),
-  check(Output).
+  op(ReadyRule),
+  coversCondImpl(Rest,AssocList,Output).
+%  check(Output).
 
 %sprawdza czy zbudowany (przy zasocjowanych rule_var'y->zmienne) kazdy Cond ma pokrycie w faktach operacyjnych
 %check(+Predicates).
@@ -114,6 +115,15 @@ extractPeople(Examples,Output) :-
   append(OpPeople,ExPeople,P),
   removeDuplications(P,Output).
 
+generateAssocList(People,Num,Args,Result) :-
+  length(Args,ArgsCount),
+  ToCombine is Num-ArgsCount,
+  generateCombination(ToCombine,People,Values),
+  permutation(Values,Permutation),
+  append(Args,Permutation,Input),
+  tagList(Input,Num,Result).
+
+
 generateAssocList(Examples,Num,Result) :-
   generateAssocListImpl(Examples,Num,Result).
 
@@ -122,10 +132,20 @@ generateAssocListImpl(Input,Num,RuleVars) :-
   permutation(Values,Permutation),
   tagList(Permutation,Num,RuleVars).
 
-tagList(_,0,[]).
-tagList([X|List],Num,[Num=X|Output]) :-
+tagList(List,Num,Output) :-
+  tagList(List,Num,Num,Output).
+
+tagList(_,_,0,[]).
+tagList([X|List],StartNum,Num,[N=X|Output]) :-
   N1 is Num-1,
-  tagList(List,N1,Output).
+  N is StartNum-Num+1,
+  tagList(List,StartNum,N1,Output).
+
+%tagList(_,0,_,[]).
+%tagList([X|List],Num,Addon,[Added=X|Output]) :-
+%  Added is Num+Addon+1,
+%  N1 is Num-1,
+%  tagList(List,N1,Addon,Output).
 
 generateCombination(0,_,[]).
 generateCombination(N,[X|T],[X|Comb]) :- 
