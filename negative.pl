@@ -1,4 +1,4 @@
-:- [examples].
+:- [examples1].
 generateNegativeExamples :-
   generateNegativeExample(Output),
   write('example(neg('),write(Output),write(')).'),nl,

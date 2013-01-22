@@ -58,6 +58,8 @@ learn_conj(Examples, Relation, LastVar, ConjCurrent, Conj)  :-
    choose_cond(Examples, Relation, LastVar, ConjCurrent, Cond, NewLastVar),    % choose one cond using score   
    filter(Examples, [Cond | ConjCurrent], NewLastVar, Examples1),   % filter Examples using what 
                                                                     % you already created
+   %write('Filter: '), write(Examples), nl,
+   %write('To: '), write(Examples1), nl,
    learn_conj(Examples1, Relation, NewLastVar, [Cond | ConjCurrent], Conj).   % 
 
 %choose_cond(+Examples, +Relation, +LastVar, +ConjCurrent, -Cond, -NewLastVar)
@@ -81,7 +83,6 @@ filter(Examples, ConjCand, LastVar, Examples1)  :-
    findall(example(UEX),
            (member(example(UEX), Examples), UEX=..[_,EX], satisfy(LastVar,EX,ConjCand)),
            Examples1).
-
 % remove(Examples, Conj, Examples1):
 %    removing from Examples those examples that are covered by Conj gives Examples1
 
@@ -98,19 +99,21 @@ filter(Examples, ConjCand, LastVar, Examples1)  :-
 score(Examples, Relation, LastVar, ConjCurrent, CondCand, Score, NewLastVar)  :-
    candidate(LastVar, CondCand, NewLastVar),
    %write('Base examples: '), write(Examples), nl,
+   suitable(Examples, [CondCand | ConjCurrent], NewLastVar),
    filter(Examples, [CondCand | ConjCurrent], NewLastVar, Examples1),      % Examples1 satisfy condition Att = Val     
    length(Examples1, N1),                       % Length of list   
    count_pos(Examples1, NPos1),          % Number of positive examples   
    NPos1 > 0,                                    % At least one positive example matches AttVal
-   Score is 2 * NPos1 - N1,
-   write('Candidate: '), write(CondCand), write(' '), write(NewLastVar), write(' '), write(Score), nl.                   % Best score attribute value 
+   Score is 2 * NPos1 - N1.
+%   write('Candidate: '), write(CondCand), write(' '), write(NewLastVar), write(' '), write(Score), nl.                   % Best score attribute value 
 %   write('With examples: '), write(Examples1), nl.
 
-%suitable(AttVal, Examples, Class)  :-            
-%    % At least one negative example must not match AttVal
-%   member(example(ClassX, ObjX), Examples),
-%   ClassX \== Class,                                           % Negative example   
-%   not(satisfy(ObjX, [AttVal])).                           % that does not match 
+suitable(Examples, Conj, LastVar)  :-            
+    % At least one negative example must not match AttVal
+   findall(example(neg(X)), member(example(neg(X)), Examples), NegEx),
+   filter(NegEx, Conj, LastVar, NegExAfter),
+   length(NegEx, LB), length(NegExAfter, LA),
+   LB > LA.
 
 % count_pos(Examples, Class, N):
 %    N is the number of positive examples of Class
@@ -128,4 +131,4 @@ writelist([X | L])  :-
    tab(2), write(X), nl,
    writelist(L).
 
-:- [examples].
+:- [examples1].

@@ -1,3 +1,7 @@
+op(rodzic(franek, darek)).
+op(rodzic(franek, iga)).
+op(rodzic(gosia, darek)).
+op(rodzic(gosia, iga)).
 op(ojciec(swirski, franek)).
 op(matka(dominika, franek)).
 op(kobieta(dominika)).
@@ -7,11 +11,6 @@ op(ojciec(franek, iga)).
 op(matka(gosia, darek)).
 op(matka(gosia, iga)).
 op(mezczyzna(franek)).
-op(rodzic(franek, darek)).
-op(rodzic(franek, iga)).
-op(rodzic(gosia, darek)).
-op(rodzic(gosia, iga)).
-op(brat(darek, iga)).
 op(brat(darek, iga)).
 op(siostra(iga, darek)).
 op(rodzenstwo(iga, darek)).
