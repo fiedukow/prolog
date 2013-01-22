@@ -7,17 +7,8 @@ generateNegativeExamples :-
 generateNegativeExamples.
 
 generateNegativeExample(Output) :-
-  extractAttributes(ExtractedAttrs),
-  removeDuplications(ExtractedAttrs,ExtractedSet),
+  people(ExtractedSet),
   combineSetOfElements(ExtractedSet,Output).
-
-% wyciagamy osoby (zdzich, janek, jurek etc.)
-extractAttributes(Output) :-
-  findall(Mem,
-            (example(pos(A)),
-             A =.. [_|List],
-             member(Mem,List)),
-            Output).
 
 % usun powtorzenia na InputList
 removeDuplications([],[]).
