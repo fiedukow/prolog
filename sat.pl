@@ -4,7 +4,6 @@
 %  ANDRZEJ FORCED ME TO COMMIT THIS :(((((((((((((
 %  I WILL REPAIR THIS SOON, PLEASE FORGIVE ME, GOD!
 
-:- [examples].
 
 %satisfy(Successor,Examples,Conjunction,OutputList) :-
 %  findall(Covered,
@@ -45,7 +44,7 @@ satisfy(RuleVarNum,Example,Conjunction) :-
   people(People),
   Example =.. [Relation|Args],
   generateAssocList(People,RuleVarNum,Args,AssocList),
-  coversCond(Conjunction,AssocList).
+  coversCond(Conjunction,AssocList), !.
 
 %satisfy(LastVar,Example,Conjunction) :-
 %  people(People),
