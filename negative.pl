@@ -1,8 +1,4 @@
-example(pos(dziadek(zdzich,janek))).
-example(pos(dziadek(jurek,benek))).
-example(pos(babcia(iga,benek))).
-example(pos(mezczyzna(marek))).
-
+:- [examples].
 generateNegativeExamples :-
   generateNegativeExample(Output),
   write('example(neg('),write(Output),write(')).'),nl,
