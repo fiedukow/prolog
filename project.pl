@@ -3,8 +3,10 @@
 % Learning of simple if-then rules
 :- [candidate].
 :- [sat].
+:- [qsort].
 :-  op(300, xfx, <==).
 
+:- assert(condsLimit(0)).
 % learn(Class): collect learning examples into a list, construct and
 % output a description for Class, and assert the corresponding rule about Class
 learn(Class)  :-
@@ -14,26 +16,47 @@ learn(Class)  :-
    writelist(Description),
    assert(Class  <==  Description).                                      % Assert rule
 
+
+goLearn(Relation, Conjs) :-
+   Relation =.. [Rel | _],
+   findall(example(pos(X)), (example(pos(X)), X=..[Rel|_]), ExamplesPos),
+   learn(Relation, ExamplesPos, Conjs).
+
+
+remove(Examples, Conj, RestExamples) :-
+   findall(example(UEX),
+           (member(example(UEX), Examples), UEX=..[_,EX], not(satisfy(6,EX,Conj))),
+           RestExamples).
+
 % learn(Examples, Class, Description):
 %    Description covers exactly the examples of class Class in list Examples
 
-learn(Examples, Class, [])  :-
-   not(member(example(Class, _ ), Examples)).               % No example to cover 
+learn(_, [], []) :- !.
 
-learn(Examples, Class, [Conj | Conjs])  :-
-   learn_conj(Examples, Class, Conj),
+% Trzyma swoja liste przykladow pozytywnych
+% Wola myLearn uzyskujac kolejne Conje
+% Usuwa przyklady pokryte przez Conja
+learn(Relation, Examples, [Conj | Conjs])  :-
+   myLearn(Relation, Conj),
+   %write('before: '), write(Examples), nl,
    remove(Examples, Conj, RestExamples),                    % Remove examples that match Conj   
-   learn(RestExamples, Class, Conjs).                       % Cover remaining examples 
+   %write('after: '), write(RestExamples), nl,
+   learn(Relation, RestExamples, Conjs).                       % Cover remaining examples 
 
 % learn_conj(Examples, Class, Conj):
 %    Conj is a list of attribute values satisfied by some examples of class Class and
 %    no other class
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 myLearn(Relation, Conj) :-
   Relation =.. [Rel | _],
   findall(example(X), (example(X), X=..[_,EX], EX=..[Rel|_]), Examples),
   learn_conj(Examples, Relation, Conj).
+
+myLearn(Relation, Conj) :-
+  retract(condsLimit(X)),
+  X1 is X + 1,
+  assert(condsLimit(X1)),
+  myLearn(Relation, Conj).
 
 %Check if there is any negative example in examples list connected with Relation
 %negativeExample(+Examples, +Relation)
@@ -50,11 +73,20 @@ learn_conj(Examples, Relation, Conj) :-
 
 
 %zamkniecie rekurencji przepisuje zebrana liste na wyjscie.
-learn_conj(Examples, _, _, Conj, Conj)  :-
-   not(negativeExample(Examples)), !.   % There is no negative example
+learn_conj(Examples, Relation, _, Conj, Conj)  :-
+   not(negativeExample(Examples)),
+%   length(Examples, PosNo),
+%   Relation =.. [Rel | _],
+%   findall(example(pos(X)), (example(pos(X)), X=..[Rel|_]), AllPos),
+%   length(AllPos, PosNo),
+%   write('Examples: '), write(Examples), nl,
+%   not(member(_, Examples)),
+   !.   % There is no negative example
                                                   % TODO is there any covered positive 
 
 learn_conj(Examples, Relation, LastVar, ConjCurrent, Conj)  :-
+   condsLimit(CondsLimit),
+   length(ConjCurrent, Len), Len =< CondsLimit,
    choose_cond(Examples, Relation, LastVar, ConjCurrent, Cond, NewLastVar),    % choose one cond using score   
    filter(Examples, [Cond | ConjCurrent], NewLastVar, Examples1),   % filter Examples using what 
                                                                     % you already created
@@ -65,17 +97,9 @@ learn_conj(Examples, Relation, LastVar, ConjCurrent, Conj)  :-
 %choose_cond(+Examples, +Relation, +LastVar, +ConjCurrent, -Cond, -NewLastVar)
 choose_cond(Examples, Relation, LastVar, ConjCurrent, Cond, NewLastVar)  :-
    findall(CondCand/NewLastVar/Score, score(Examples, Relation, LastVar, ConjCurrent, CondCand, Score, NewLastVar), CondCands),
-   best(CondCands, Cond/NewLastVar),
+   qsort(CondCands, Sorted), 
+   member(Cond/NewLastVar/_, Sorted),
    write('New Cond: '), write(Cond), write(' '), write(NewLastVar), nl.                   % Best score attribute value 
-
-best([AttVal/LV/_], AttVal/LV).
-
-best([AV0/LV0/S0, AV1/LV1/S1 | AVSlist], AttVal)  :-
-   S1  >  S0, !,                                             % AV1 better than AV0   
-   best([AV1/LV1/S1 | AVSlist], AttVal)
-   ;
-   best([AV0/LV0/S0 | AVSlist], AttVal).
-
 
 % filter(Examples, Condition, Examples1):
 %    Examples1 contains elements of Examples that satisfy Condition
@@ -105,7 +129,8 @@ score(Examples, Relation, LastVar, ConjCurrent, CondCand, Score, NewLastVar)  :-
    count_pos(Examples1, NPos1),          % Number of positive examples   
    NPos1 > 0,                                    % At least one positive example matches AttVal
    Score is 2 * NPos1 - N1.
-%   write('Candidate: '), write(CondCand), write(' '), write(NewLastVar), write(' '), write(Score), nl.                   % Best score attribute value 
+%   write('Candidate: '), write(CondCand), write(' '), write(NewLastVar), write(' '), write(Score), nl.    
+%   Best score attribute value 
 %   write('With examples: '), write(Examples1), nl.
 
 suitable(Examples, Conj, LastVar)  :-            
