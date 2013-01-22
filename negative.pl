@@ -31,7 +31,8 @@ combineSetOfElements(Input,Output) :-
   removeDuplications(Predicates,Preds),!, % optimization
   getArity(Preds,Name/Arity),
   generateCombinationRep(Arity,Input,Combination),
-  Output =.. [Name|Combination].
+  Output =.. [Name|Combination],
+  not(example(pos(Output))).
 
 getArity([],[]).
 getArity([Name/Arity|_],Name/Arity).
