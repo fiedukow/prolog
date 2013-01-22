@@ -21,7 +21,8 @@ combineSetOfElements(Input,Output) :-
   extractPredicates(Predicates),
   removeDuplications(Predicates,Preds),!, % optimization
   getArity(Preds,Name/Arity),
-  generateCombinationRep(Arity,Input,Combination),
+%  generateCombinationRep(Arity,Input,Comb),
+  varianceRep(Arity,Input,Combination),
   Output =.. [Name|Combination],
   not(example(pos(Output))).
 
@@ -52,4 +53,17 @@ generateCombinationRep(N,[X|T],[X|Comb]) :-
 generateCombinationRep(N,[_|T],Comb) :- 
   N>0,
   generateCombinationRep(N,T,Comb).
+
+% below functions found at: http://kti.mff.cuni.cz/~bartak/prolog/combinatorics.html
+% author: Roman Barták
+delete(X,[X|T],T).
+delete(X,[H|T],[H|NT]) :-
+  delete(X,T,NT).
+
+varianceRep(0,_,[]).
+varianceRep(N,L,[H|RVaria]) :- 
+  N>0,
+  N1 is N-1,
+  delete(H,L,_),
+  varianceRep(N1,L,RVaria).
 
