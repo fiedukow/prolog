@@ -37,10 +37,10 @@ myLearn(Relation, Conj) :-
 
 %Check if there is any negative example in examples list connected with Relation
 %negativeExample(+Examples, +Relation)
-negativeExample(Examples, Relation) :-
-  Relation =.. [RelationName | _],
-  member(example(neg(NegExample)), Examples),
-  NegExample =.. [RelationName | _].
+negativeExample(Examples) :-
+%  Relation =.. [RelationName | _],
+  member(example(neg(_)), Examples).
+%  NegExample =.. [RelationName | _].
 
 %Podaj tylko Example dla relacji ktora cie interesuje!!!
 %learn_conj(+Examples, +Relation, -Conj).
@@ -50,8 +50,8 @@ learn_conj(Examples, Relation, Conj) :-
 
 
 %zamkniecie rekurencji przepisuje zebrana liste na wyjscie.
-learn_conj(Examples, Relation, _, Conj, Conj)  :-
-   not(negativeExample(Examples, Relation)), !.   % There is no negative example
+learn_conj(Examples, _, _, Conj, Conj)  :-
+   not(negativeExample(Examples)), !.   % There is no negative example
                                                   % TODO is there any covered positive 
 
 learn_conj(Examples, Relation, LastVar, ConjCurrent, Conj)  :-
@@ -97,14 +97,14 @@ filter(Examples, ConjCand, LastVar, Examples1)  :-
 %score(+Examples, +Relation, +LastVar, +ConjCurrent, -CondCand, -Score, -NewLastVar)
 score(Examples, Relation, LastVar, ConjCurrent, CondCand, Score, NewLastVar)  :-
    candidate(LastVar, CondCand, NewLastVar),
-   write('Base examples: '), write(Examples), nl,
+   %write('Base examples: '), write(Examples), nl,
    filter(Examples, [CondCand | ConjCurrent], NewLastVar, Examples1),      % Examples1 satisfy condition Att = Val     
    length(Examples1, N1),                       % Length of list   
    count_pos(Examples1, NPos1),          % Number of positive examples   
    NPos1 > 0,                                    % At least one positive example matches AttVal
    Score is 2 * NPos1 - N1,
-   write('Candidate: '), write(CondCand), write(' '), write(NewLastVar), write(' '), write(Score), nl,                   % Best score attribute value 
-   write('With examples: '), write(Examples1), nl.
+   write('Candidate: '), write(CondCand), write(' '), write(NewLastVar), write(' '), write(Score), nl.                   % Best score attribute value 
+%   write('With examples: '), write(Examples1), nl.
 
 %suitable(AttVal, Examples, Class)  :-            
 %    % At least one negative example must not match AttVal
