@@ -2,7 +2,7 @@
 
 % Learning of simple if-then rules
 :- [candidate].
-:- [sat].
+:- [satisfy].
 :- [qsort].
 :-  op(300, xfx, <==).
 
@@ -46,6 +46,7 @@ learn(Relation, Examples, [Conj | Conjs])  :-
 % learn_conj(Examples, Class, Conj):
 %    Conj is a list of attribute values satisfied by some examples of class Class and
 %    no other class
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 myLearn(Relation, Conj) :-
   Relation =.. [Rel | _],
@@ -107,6 +108,7 @@ filter(Examples, ConjCand, LastVar, Examples1)  :-
    findall(example(UEX),
            (member(example(UEX), Examples), UEX=..[_,EX], satisfy(LastVar,EX,ConjCand)),
            Examples1).
+
 % remove(Examples, Conj, Examples1):
 %    removing from Examples those examples that are covered by Conj gives Examples1
 

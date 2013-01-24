@@ -45,3 +45,25 @@ example(neg(babcia(dominika,dominika))).
 
 people([swirski, franek, dominika, iga, gosia, darek]).
 
+example(neg(dziadek(swirski,swirski))).
+example(neg(dziadek(swirski,iga))).
+example(neg(dziadek(swirski,darek))).
+example(neg(dziadek(swirski,dominika))).
+example(neg(dziadek(iga,iga))).
+example(neg(dziadek(iga,darek))).
+example(neg(dziadek(iga,dominika))).
+example(neg(dziadek(darek,darek))).
+example(neg(dziadek(darek,dominika))).
+example(neg(dziadek(dominika,dominika))).
+example(neg(babcia(swirski,swirski))).
+example(neg(babcia(swirski,iga))).
+example(neg(babcia(swirski,darek))).
+example(neg(babcia(swirski,dominika))).
+example(neg(babcia(iga,iga))).
+example(neg(babcia(iga,darek))).
+example(neg(babcia(iga,dominika))).
+example(neg(babcia(darek,darek))).
+example(neg(babcia(darek,dominika))).
+example(neg(babcia(dominika,dominika))).
+
+
