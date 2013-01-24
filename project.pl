@@ -4,7 +4,6 @@
 :- [candidate].
 :- [satisfy].
 :- [qsort].
-:-  op(300, xfx, <==).
 
 :- assert(condsLimit(0)).
 
@@ -107,7 +106,6 @@ score(Examples, Relation, LastVar, ConjCurrent, CondCand, Score, NewLastVar)  :-
    Score is 2 * NPos1 - N1.
 
 suitable(Examples, Conj, LastVar)  :-            
-    % At least one negative example must not match AttVal
    findall(example(neg(X)), member(example(neg(X)), Examples), NegEx),
    filter(NegEx, Conj, LastVar, NegExAfter),
    length(NegEx, LB), length(NegExAfter, LA),
@@ -118,11 +116,5 @@ count_pos([], 0).
 count_pos([example(X) | Examples], N)  :-
    count_pos(Examples, N1),
    (functor(X, pos, _), !, N is N1 + 1; N = N1).
-
-writelist([]).
-
-writelist([X | L])  :-
-   tab(2), write(X), nl,
-   writelist(L).
 
 :- [examples2].
