@@ -74,7 +74,7 @@ learn_conj(Examples, Relation, Conj) :-
 
 
 %zamkniecie rekurencji przepisuje zebrana liste na wyjscie.
-learn_conj(Examples, Relation, _, Conj, Conj)  :-
+learn_conj(Examples, _, _, Conj, Conj)  :-
    not(negativeExample(Examples)),
 %   length(Examples, PosNo),
 %   Relation =.. [Rel | _],
@@ -83,7 +83,6 @@ learn_conj(Examples, Relation, _, Conj, Conj)  :-
 %   write('Examples: '), write(Examples), nl,
 %   not(member(_, Examples)),
    !.   % There is no negative example
-                                                  % TODO is there any covered positive 
 
 learn_conj(Examples, Relation, LastVar, ConjCurrent, Conj)  :-
    condsLimit(CondsLimit),
